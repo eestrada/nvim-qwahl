@@ -309,22 +309,40 @@ end
 
 --- Close quickfix list and show its contents using vim.ui.select.
 --- Jump to entry when selected.
-function M.quickfix()
-  vim.cmd('cclose')
-  local items = vim.fn.getqflist()
+--- The Location List can be used instead by passing the option `use_loclist = true` like so:
+---
+---     require('qwahl').quickfix({ use_loclist = true })
+---
+--- FIXME: If the cursor is in a Location List window, it will not
+--- detect this and will simply show an empty selection list.
+function M.quickfix(opts)
+  opts = opts or {}
   local win = api.nvim_get_current_win()
-  local opts = {
+  local jump_cmd = nil
+  local items = {}
+  local lopts = {
     prompt = 'Quickfix: ',
     format_item = function(item)
       return M.format_bufname(item.bufnr) .. ': ' .. item.text
     end
   }
-  ui.select(items, opts, function(item, idx)
+  if opts.use_loclist then
+    vim.cmd('lclose')
+    items = vim.fn.getloclist(win)
+    jump_cmd = 'll '
+    lopts.prompt = 'Location List: '
+  else
+    vim.cmd('cclose')
+    items = vim.fn.getqflist()
+    jump_cmd = 'cc '
+    lopts.prompt = 'Quickfix: '
+  end
+  ui.select(items, lopts, function(item, idx)
     if not item then
       return
     end
     api.nvim_win_call(win, function()
-      vim.cmd('cc ' .. tostring(idx))
+      vim.cmd(jump_cmd .. tostring(idx))
       vim.cmd('normal! zvzz')
     end)
   end)

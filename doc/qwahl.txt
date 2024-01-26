@@ -51,6 +51,12 @@ M.buf_tags()                                                    *qwahl.buf_tags*
 M.quickfix()                                                    *qwahl.quickfix*
      Close quickfix list and show its contents using vim.ui.select.
      Jump to entry when selected.
+     The Location List can be used instead by passing the option `use_loclist = true` like so:
+
+         require('qwahl').quickfix({ use_loclist = true })
+
+     FIXME: If the cursor is in a Location List window, it will not
+     detect this and will simply show an empty selection list.
 
 
 M.jumplist()                                                    *qwahl.jumplist*
